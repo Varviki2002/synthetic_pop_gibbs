@@ -1,9 +1,6 @@
 import itertools
-
 import pandas as pd
-import gdown
-
-from src.dataloader import Downloader
+# import gdown
 
 import warnings
 warnings.filterwarnings('ignore')
@@ -18,7 +15,8 @@ class CondCreat:
         self.cross_3 = None
         self.cross_4 = None
 
-    def calculate_cond_table(self, lista, df):
+    @staticmethod
+    def calculate_cond_table(lista, df):
         new_df = df.copy()
         for tup in itertools.product(*lista):
             conditional = new_df[tup] / sum(new_df[tup])
@@ -40,10 +38,14 @@ class CondCreat:
         self.cross_4.fillna(0, inplace=True)
 
     def create_conditional_tables(self):
-        cardinalities_1 = [list(set(self.table["sex"])), list(set(self.table["hhsize"])), list(set(self.table["hdgree"]))]
-        cardinalities_2 = [list(set(self.table["agegrp"])), list(set(self.table["hhsize"])), list(set(self.table["hdgree"]))]
-        cardinalities_3 = [list(set(self.table["agegrp"])), list(set(self.table["sex"])), list(set(self.table["hhsize"]))]
-        cardinalities_4 = [list(set(self.table["agegrp"])), list(set(self.table["sex"])), list(set(self.table["hdgree"]))]
+        cardinalities_1 = [list(set(self.table["sex"])), list(set(self.table["hhsize"])),
+                           list(set(self.table["hdgree"]))]
+        cardinalities_2 = [list(set(self.table["agegrp"])), list(set(self.table["hhsize"])),
+                           list(set(self.table["hdgree"]))]
+        cardinalities_3 = [list(set(self.table["agegrp"])), list(set(self.table["sex"])),
+                           list(set(self.table["hhsize"]))]
+        cardinalities_4 = [list(set(self.table["agegrp"])), list(set(self.table["sex"])),
+                           list(set(self.table["hdgree"]))]
 
         self.create_cross_tables()
 
@@ -57,11 +59,10 @@ class CondCreat:
     def save_cross_tables(self):
         cond_1, cond_2, cond_3, cond_4 = self.create_conditional_tables()
 
-        cond_1.to_csv("../generated/cross_table_1.csv")
-        cond_2.to_csv("../generated/cross_table_2.csv")
-        cond_3.to_csv("../generated/cross_table_3.csv")
-        cond_4.to_csv("../generated/cross_table_4.csv")
-
+        cond_1.to_excel("../generated/cross_table_1.xlsx")
+        cond_2.to_excel("../generated/cross_table_2.xlsx")
+        cond_3.to_excel("../generated/cross_table_3.xlsx")
+        cond_4.to_excel("../generated/cross_table_4.xlsx")
 
 
 def main():
