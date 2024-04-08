@@ -2,6 +2,7 @@ import os
 
 import requests
 import pandas as pd
+import gdown
 
 from src import PROJECT_PATH
 
@@ -24,7 +25,8 @@ class Downloader:
             os.path.join(data_folder, "generated")
             os.makedirs(data_folder, exist_ok=True)
             file = os.path.join(data_folder, file_name)
-            if not os.path.isfile(file):
-                r = requests.get(gdrive_link + gdrive_id, allow_redirects=True)
-                open(file, "wb").write(r.content)
+            url = gdrive_link + gdrive_id
+            output = file_name
+            gdown.download(url, file)
+
             self.data = pd.read_csv(file)

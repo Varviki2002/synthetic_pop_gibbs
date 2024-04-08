@@ -1,9 +1,13 @@
+import os
+
 import itertools
 import numpy as np
 import pandas as pd
 from pgmpy.factors.discrete import (TabularCPD)
 from pgmpy.models import BayesianNetwork
 from pgmpy.sampling.Sampling import GibbsSampling
+
+from src import PROJECT_PATH
 
 import warnings
 warnings.filterwarnings('ignore')
@@ -58,10 +62,12 @@ def main():
     evidence = {"agegrp": ["sex", "hhsize", "hdgree"], "sex": ["agegrp", "hhsize", "hdgree"],
                 "hdgree": ["agegrp", "sex", "hhsize"], "hhsize": ["agegrp", "sex", "hdgree"]}
 
-    cond_1 = pd.read_excel("../generated/cross_table_1.xlsx", header=[0, 1, 2], index_col=[0])
-    cond_2 = pd.read_excel("../generated/cross_table_2.xlsx", header=[0, 1, 2], index_col=[0])
-    cond_3 = pd.read_excel("../generated/cross_table_3.xlsx", header=[0, 1, 2], index_col=[0])
-    cond_4 = pd.read_excel("../generated/cross_table_4.xlsx", header=[0, 1, 2], index_col=[0])
+    data_generated = os.path.join(PROJECT_PATH, "generated")
+
+    cond_1 = pd.read_excel(os.path.join(data_generated, "cross_table_1.xlsx"), header=[0, 1, 2], index_col=[0])
+    cond_2 = pd.read_excel(os.path.join(data_generated, "cross_table_2.xlsx"), header=[0, 1, 2], index_col=[0])
+    cond_3 = pd.read_excel(os.path.join(data_generated, "cross_table_3.xlsx"), header=[0, 1, 2], index_col=[0])
+    cond_4 = pd.read_excel(os.path.join(data_generated, "cross_table_4.xlsx"), header=[0, 1, 2], index_col=[0])
 
     student = BayesianNetwork([('agegrp', 'sex'), ('hhsize', 'hdgree')])
     cpd_diff = TabularCPD('agegrp', 18, cond_1.values, evidence["agegrp"], [2, 5, 3])
@@ -73,7 +79,7 @@ def main():
     gibbs_chain = NewGibbsSampling(evidence=evidence, model=student)
     samples = gibbs_chain.sample(size=14826299)
     print(type(samples))
-    samples.to_csv("../data/samples.csv", index=False)
+    samples.to_csv(os.path.join(data_generated, "samples.csv"), index=False)
 
 
 if __name__ == "__main__":

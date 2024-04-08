@@ -1,9 +1,14 @@
+import os
+
 import itertools
 import pandas as pd
-# import gdown
+
+from src.dataloader import Downloader
 
 import warnings
 warnings.filterwarnings('ignore')
+
+from src import PROJECT_PATH
 
 
 class CondCreat:
@@ -59,18 +64,17 @@ class CondCreat:
     def save_cross_tables(self):
         cond_1, cond_2, cond_3, cond_4 = self.create_conditional_tables()
 
-        cond_1.to_excel("../generated/cross_table_1.xlsx")
-        cond_2.to_excel("../generated/cross_table_2.xlsx")
-        cond_3.to_excel("../generated/cross_table_3.xlsx")
-        cond_4.to_excel("../generated/cross_table_4.xlsx")
+        data_generated = os.path.join(PROJECT_PATH, "generated")
+
+        cond_1.to_excel(os.path.join(data_generated, "cross_table_1.xlsx"))
+        cond_2.to_excel(os.path.join(data_generated, "cross_table_2.xlsx"))
+        cond_3.to_excel(os.path.join(data_generated, "cross_table_3.xlsx"))
+        cond_4.to_excel(os.path.join(data_generated, "cross_table_4.xlsx"))
 
 
 def main():
-    # a file
-    # url = "https://drive.google.com/uc?id=1BvkpS34abcnxJahdBOrY3h1BlKgMwm0S"
-    # output = "synthetic_pop_y_2021.csv"
-    # gdown.download(url, output)
-    data = pd.read_csv("../data/synthetic_pop_y_2021.csv")
+
+    data = Downloader(gdrive_id="1BvkpS34abcnxJahdBOrY3h1BlKgMwm0S", file_name="synthetic_pop_y_2021.csv").data
 
     evidence = {"agegrp": ["sex", "hhsize", "hdgree"], "sex": ["agegrp", "hhsize", "hdgree"],
                 "hdgree": ["agegrp", "sex", "hhsize"], "hhsize": ["agegrp", "sex", "hdgree"]}

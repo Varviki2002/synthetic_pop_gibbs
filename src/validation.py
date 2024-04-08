@@ -1,13 +1,16 @@
+import os
+
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 
+from src import PROJECT_PATH
 
 class Validation:
     def __init__(self, ipf):
         self.ipf_data = ipf
-        self.gibbs_data = pd.read_csv("../data/samples.csv")
-        self.census = pd.read_csv("../data/synthetic_pop_y_2021.csv")
+        self.gibbs_data = pd.read_csv(os.path.join(PROJECT_PATH, "data/samples.csv"))
+        self.census = pd.read_csv(os.path.join(PROJECT_PATH, "data/synthetic_pop_y_2021.csv"))
 
     def create_columns(self, col_name, dict_1, dict_2):
         tab_1 = self.census[col_name].value_counts(sort=False)
