@@ -23,10 +23,11 @@ State = namedtuple("State", ["var", "state"])
 
 
 class NewGibbsSampling(GibbsSampling):
-    def __init__(self, evidence, model):
+    def __init__(self, evidence, model, partial=None):
         super().__init__(model)
 
         self.evidence = evidence
+        self.partial = partial
 
         if isinstance(model, BayesianNetwork):
             self._get_from_bayesian_model(model)
@@ -60,10 +61,20 @@ class NewGibbsSampling(GibbsSampling):
                 lista.append(small_list)
             for tup in itertools.product(*lista):
                 array = np.zeros(self.cardinalities[var])
-                for i in range(self.cardinalities[var]):
-                    cpd = model.get_cpds(node=var).values
-                    array[i] = cpd[i][tup[0]][tup[1]][tup[2]][tup[3]][tup[4]]
-                kernel[tup] = array
+                if (self.partial is not None) and (var in list(self.partial.keys())):
+                    for i in range(self.cardinalities[var]):
+                        cpd = model.get_cpds(node=var).values
+                        array[i] = cpd[i][tup[0]][tup[1]][tup[2]][tup[3]]
+                    for num in range(self.partial[var][1]):
+                        list_tup = list(tup)
+                        list_tup.insert(self.partial[var][2], num)
+                        tup_kernel = tuple(list_tup)
+                        kernel[tup_kernel] = array
+                else:
+                    for i in range(self.cardinalities[var]):
+                        cpd = model.get_cpds(node=var).values
+                        array[i] = cpd[i][tup[0]][tup[1]][tup[2]][tup[3]][tup[4]]
+                    kernel[tup] = array
             self.transition_models[var] = kernel
 
     def sample(self, start_state=None, size=1, seed=None, include_latents=False):
@@ -95,10 +106,7 @@ class NewGibbsSampling(GibbsSampling):
 
 
 def main():
-    data = Downloader.read_data(file=os.path.join(PROJECT_PATH, "data/Census_2016_Individual_PUMF.dta"))
-
-    names = ["agegrp", "Sex", "hdgree", "lfact", "TotInc", "hhsize"]
-    cards = [18, 2, 3, 3, 4, 5]
+    # cards = [18, 2, 3, 3, 4, 5]
 
     evidence = {"agegrp": ["Sex", "hdgree", "lfact", "TotInc", "hhsize"],
                 "Sex": ["agegrp", "hdgree", "lfact", "TotInc", "hhsize"],
@@ -107,18 +115,16 @@ def main():
                 "TotInc": ["agegrp", "Sex", "hdgree", "lfact", "hhsize"],
                 "hhsize": ["agegrp", "Sex", "hdgree", "lfact", "TotInc"]}
 
-    # cla = CondCreat(table=data, evidence=evidence, full_names=names)
+    partial_1 = {"agegrp": ["Sex", 2, 0]}
+
+    evidence_partial_1 = {"agegrp": ["hdgree", "lfact", "TotInc", "hhsize"],
+                          "Sex": ["agegrp", "hdgree", "lfact", "TotInc", "hhsize"],
+                          "hdgree": ["agegrp", "Sex", "lfact", "TotInc", "hhsize"],
+                          "lfact": ["agegrp", "Sex", "hdgree", "TotInc", "hhsize"],
+                          "TotInc": ["agegrp", "Sex", "hdgree", "lfact", "hhsize"],
+                          "hhsize": ["agegrp", "Sex", "hdgree", "lfact", "TotInc"]}
 
     data_generated = os.path.join(PROJECT_PATH, "generated")
-
-    # cond_1, cond_2, cond_3, cond_4, cond_5, cond_6 = cla.create_full_conditional_tables()
-    # cond_1.fillna(0.0, inplace=True)
-    # cond_2.fillna(0.0, inplace=True)
-    # cond_3.fillna(0.0, inplace=True)
-    # cond_4.fillna(0.0, inplace=True)
-    # cond_5.fillna(0.0, inplace=True)
-    # cond_6.fillna(0.0, inplace=True)
-
 
     cond_1 = pd.read_csv(os.path.join(data_generated, "full_cross_table_1.csv"), header=[0, 1, 2, 3, 4], index_col=[0])
     cond_2 = pd.read_csv(os.path.join(data_generated, "full_cross_table_2.csv"), header=[0, 1, 2, 3, 4], index_col=[0])
@@ -126,29 +132,41 @@ def main():
     cond_4 = pd.read_csv(os.path.join(data_generated, "full_cross_table_4.csv"), header=[0, 1, 2, 3, 4], index_col=[0])
     cond_5 = pd.read_csv(os.path.join(data_generated, "full_cross_table_5.csv"), header=[0, 1, 2, 3, 4], index_col=[0])
     cond_6 = pd.read_csv(os.path.join(data_generated, "full_cross_table_6.csv"), header=[0, 1, 2, 3, 4], index_col=[0])
+    partial = pd.read_csv(os.path.join(data_generated, "partial_cross_1.csv"), header=[0, 1, 2, 3], index_col=[0])
 
     student = BayesianNetwork([("agegrp", "Sex"), ("hdgree", "lfact"), ("TotInc", "hhsize")])
-    cpd_diff = TabularCPD('agegrp', 18, cond_1.values, evidence["agegrp"],
-                          [2, 3, 3, 4, 5])
-    cpd_intel = TabularCPD('Sex', 2, cond_2.values, evidence["Sex"],
-                           [18, 3, 3, 4, 5])
-    cpd_grade = TabularCPD('hdgree', 3, cond_3.values, evidence["hdgree"],
-                           [18, 2, 3, 4, 5])
-    cpd_lfact = TabularCPD('lfact', 3, cond_4.values, evidence["lfact"],
-                           [18, 2, 3, 4, 5])
-    cpd_totinc = TabularCPD('TotInc', 4, cond_5.values, evidence["TotInc"],
-                            [18, 2, 3, 3, 5])
-    cpd_age = TabularCPD('hhsize', 5, cond_6.values, evidence["hhsize"],
-                         [18, 2, 3, 3, 4])
+    cpd_diff = TabularCPD(variable='agegrp', variable_card=18, values=cond_1.values, evidence=evidence["agegrp"],
+                          evidence_card=[2, 3, 3, 4, 5])
+    cpd_intel = TabularCPD(variable='Sex', variable_card=2, values=cond_2.values, evidence=evidence["Sex"],
+                           evidence_card=[18, 3, 3, 4, 5])
+    cpd_grade = TabularCPD(variable='hdgree', variable_card=3, values=cond_3.values, evidence=evidence["hdgree"],
+                           evidence_card=[18, 2, 3, 4, 5])
+    cpd_lfact = TabularCPD(variable='lfact', variable_card=3, values=cond_4.values, evidence=evidence["lfact"],
+                           evidence_card=[18, 2, 3, 4, 5])
+    cpd_totinc = TabularCPD(variable='TotInc', variable_card=4, values=cond_5.values, evidence=evidence["TotInc"],
+                            evidence_card=[18, 2, 3, 3, 5])
+    cpd_age = TabularCPD(variable='hhsize', variable_card=5, values=cond_6.values, evidence=evidence["hhsize"],
+                         evidence_card=[18, 2, 3, 3, 4])
     student.add_cpds(cpd_diff, cpd_intel, cpd_lfact, cpd_totinc, cpd_grade, cpd_age)
 
     gibbs_chain = NewGibbsSampling(evidence=evidence, model=student)
-    samples = gibbs_chain.sample(size=9165670)
+    samples = gibbs_chain.sample(size=18381340)
     print(type(samples))
-    samples = samples.iloc[::10, :]
+    samples.drop(samples.index[0:50000], axis=0, inplace=True)
+    samples = samples.iloc[::20, :]
     print(samples.shape)
     samples.to_csv(os.path.join(data_generated, "samples.csv"), index=False)
 
+    # population_partial = BayesianNetwork([("agegrp", "Sex"), ("hdgree", "lfact"), ("TotInc", "hhsize")])
+    # cpd_partial_1 = TabularCPD(variable='agegrp', variable_card=18, values=partial.values,
+    #                            evidence=evidence_partial_1["agegrp"], evidence_card=[3, 3, 4, 5])
+    # population_partial.add_cpds(cpd_partial_1, cpd_intel, cpd_lfact, cpd_totinc, cpd_grade, cpd_age)
+    # gibbs_chain_partial = NewGibbsSampling(evidence=evidence_partial_1, model=population_partial, partial=partial_1)
+    # samples_partial = gibbs_chain_partial.sample(size=9165670)
+    # print(type(samples_partial))
+    # samples_partial = samples_partial.iloc[::10, :]
+    # print(samples_partial.shape)
+    # samples_partial.to_csv(os.path.join(data_generated, "samples_partial.csv"), index=False)
 
 if __name__ == "__main__":
     main()

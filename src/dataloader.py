@@ -1,12 +1,10 @@
 import os
 
-import requests
-import pandas as pd
 import gdown
+import pandas as pd
 import pyreadstat
 
 from src import PROJECT_PATH
-from src.datamanipulator import DataManipulator
 
 
 class Downloader:
@@ -32,17 +30,17 @@ class Downloader:
             gdown.download(url, file)
 
     @staticmethod
-    def read_data(file):
+    def read_data(file, province=None):
         df_indiv, meta_indiv = pyreadstat.read_dta(file, usecols=['ppsort', 'weight', 'agegrp', 'Sex',
                                                                   "hdgree", "lfact", 'TotInc',
                                                                   "hhsize", "cfstat",
                                                                   "cma", "pr"])
         df_indiv['pr'] = df_indiv['pr'].astype(str)
-        # if (province == '60') | (province == '61') | (province == '62'):
-        #     df_indiv = df_indiv.loc[df_indiv["pr"].str.strip() == '70']
-        # else:
-        #     df_indiv = df_indiv.loc[df_indiv["pr"].str.strip() == province]
-        # return df_indiv
+        if province is not None:
+            df_indiv = df_indiv.loc[df_indiv["pr"].str.strip() == province]
+        else:
+            pass
+
         df_indiv = df_indiv.query("agegrp != 88")
         df_indiv = df_indiv.query("TotInc != 88888888")
 
@@ -62,3 +60,13 @@ class Downloader:
 
         return df_indiv
 
+
+def main():
+    pass
+    # Downloader(gdrive_id="1fni7wudNdWjy5BsPpNXaxLGshyNtiapK", file_name="Census_2016_Individual_PUMF.dta")
+    # Downloader(gdrive_id="1JCPZtvA3oxdBFRjB_MTB3AWVz02zz3Z8", file_name="ipf_10.json")
+    # Downloader(gdrive_id="1vbMwVXsVg8mFDUxq-ioPpVZPt6Wrmqwv", file_name="da_10.json")
+
+
+if __name__ == "__main__":
+    main()
