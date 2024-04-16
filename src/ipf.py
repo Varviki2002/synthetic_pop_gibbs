@@ -115,7 +115,7 @@ class IPF:
     def probabilistic_sampling(p, total_pop):
         probas = np.float64(p[0]).ravel()
         probas /= np.sum(probas)
-        selected = np.random.choice(len(probas), total_pop, False, probas)
+        selected = np.random.choice(len(probas), total_pop, True, probas)
         result = np.zeros(p[0].shape, np.uint8)
         result.ravel()[selected] = 1
         return result
@@ -140,7 +140,7 @@ class IPF:
                              marginal_age_by_sex.astype(float), marginal_hdgree.astype(float),
                              marginal_lfact.astype(float), marginal_inc.astype(float),
                              marginal_hh_size.astype(float)])
-        # probabilistic sampling
+        # p = np.load(os.path.join(PROJECT_PATH, 'generated/p.npy'))
         p_list = list(p)
         p_list[0] = self.probabilistic_sampling(p, total_pop)
 
@@ -152,12 +152,13 @@ class IPF:
         syn_inds = pd.DataFrame(columns=["Sex", "agegrp", "hdgree", "lfact", "TotInc", "hhsize", "province"])
 
         table = humanleague.flatten(p[0])
-        chunk.sex = table[0]
+        # table = np.load(os.path.join(PROJECT_PATH, 'generated/table.npy'))
+        chunk.Sex = table[0]
         chunk.agegrp = table[1]
         chunk.hdgree = table[2]
         chunk.lfact = table[3]
         chunk.hhsize = table[5]
-        chunk.totinc = table[4]
+        chunk.TotInc = table[4]
         chunk['province'] = self.province
         syn_inds = pd.concat([syn_inds, chunk], ignore_index=True)
         return syn_inds
@@ -170,8 +171,9 @@ def main():
 
     names = ["agegrp", "Sex", "hdgree", "lfact", "TotInc", "hhsize"]
 
-    ipf = IPF(table=data, name_list=names, json_dict=json_dict, province=10)
-    ipf.ipf()
+    ipf = IPF(table=data, json_dict=json_dict, province=10)
+    ipf_data = ipf.ipf()
+    print(data)
 
 if __name__ == "__main__":
     main()

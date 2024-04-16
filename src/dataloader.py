@@ -66,6 +66,7 @@ def main():
     # Downloader(gdrive_id="1fni7wudNdWjy5BsPpNXaxLGshyNtiapK", file_name="Census_2016_Individual_PUMF.dta")
     # Downloader(gdrive_id="1JCPZtvA3oxdBFRjB_MTB3AWVz02zz3Z8", file_name="ipf_10.json")
     # Downloader(gdrive_id="1vbMwVXsVg8mFDUxq-ioPpVZPt6Wrmqwv", file_name="da_10.json")
+    # Downloader(gdrive_id="1B0vWMONt6MFSzld_CghvzQMN_iyH1I7R", file_name="ipf_10pr.csv")
 
 
 if __name__ == "__main__":

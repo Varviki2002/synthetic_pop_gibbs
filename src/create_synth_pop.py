@@ -99,7 +99,6 @@ class CondCreat:
 
 
 def main():
-    # Downloader(gdrive_id="1fni7wudNdWjy5BsPpNXaxLGshyNtiapK", file_name="Census_2016_Individual_PUMF.dta")
     data = Downloader.read_data(file=os.path.join(PROJECT_PATH, "data/Census_2016_Individual_PUMF.dta"))
 
     names = ["agegrp", "Sex", "hdgree", "lfact", "TotInc", "hhsize"]

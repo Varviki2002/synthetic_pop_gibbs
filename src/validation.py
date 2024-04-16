@@ -17,8 +17,9 @@ class Validation:
     def __init__(self, creat_class: CondCreat, names):
         self.names = names
         self.creat_class = creat_class
-        # self.ipf_data = pd.read_csv(os.path.join(PROJECT_PATH, "data/ipf.csv"))
+        self.ipf_10pr = pd.read_csv(os.path.join(PROJECT_PATH, "data/ipf_10pr.csv"))
         # self.ipf_data.drop([self.ipf_data.columns[0]], inplace=True, axis=1)
+        self.gibbs_10pr = pd.read_csv(os.path.join(PROJECT_PATH, "generated/samples_10pr.csv"))
         self.gibbs_data = pd.read_csv(os.path.join(PROJECT_PATH, "generated/samples.csv"))
         self.census = self.creat_class.table
         self.gibbs_partial_1 = pd.read_csv(os.path.join(PROJECT_PATH, "generated/samples_partial.csv"))
@@ -78,7 +79,7 @@ class Validation:
 
         return model
 
-    def plot_lin_regression(self, x, y, xlabel):
+    def plot_lin_regression(self, x, y, xlabel, title=None):
         model = self.linear_regression(x=x, y=y)
         X = list(x.values.ravel())
         Y = list(y.values.ravel())
@@ -90,6 +91,7 @@ class Validation:
         # plt.text(0, 170000, f"y = {model.params[1].round(5)}x", bbox=dict(facecolor='blue', alpha=0.2))
         plt.xlabel(xlabel=xlabel)
         plt.ylabel("Census")
+        plt.title(title)
         plt.show()
 
     @staticmethod
@@ -168,11 +170,13 @@ def main():
     validation.plot_figures(col_name="hhsize", dict_1=hhsize_1, dict_2=hhsize_2)
     plt.show()
 
-    validation.plot_lin_regression(x=validation.cross_gibbs, y=validation.cross_census, xlabel="Simulation")
+    validation.plot_lin_regression(x=validation.cross_gibbs, y=validation.cross_census,
+                                   xlabel="Simulation", title="Full conditionals")
 
     r, nrmse, rae = validation.run_calculations(census=validation.cross_census, simulation=validation.cross_gibbs)
 
-    validation.plot_lin_regression(x=validation.cross_partial_1, y=validation.cross_census, xlabel="Simulation")
+    validation.plot_lin_regression(x=validation.cross_partial_1, y=validation.cross_census,
+                                   xlabel="Simulation", title="Partial_1")
 
 
 if __name__ == "__main__":
