@@ -42,15 +42,15 @@ class Validation:
         df_1 = pd.DataFrame(dict_1)
         df_2 = pd.DataFrame(dict_2)
 
-        df_1['ds'] = 'Census'
-        df_2['ds'] = 'Simulation'
+        df_1["ds"] = "Census"
+        df_2["ds"] = "Simulation"
         dss = pd.concat([df_1, df_2])
         return dss
 
     def plot_figures(self, col_name, dict_1, dict_2):
         dss = self.create_columns(col_name=col_name, dict_1=dict_1, dict_2=dict_2)
         aspect = 2
-        if col_name == 'agegrp':
+        if col_name == "agegrp":
             aspect = 5
         g = sns.catplot(
             data=dss, kind="bar",
@@ -64,8 +64,8 @@ class Validation:
 
         # iterate through the axes containers
         for c in ax.containers:
-            labels = [f'{(v.get_height() / 10000):.3f}m' for v in c]
-            ax.bar_label(c, labels=labels, label_type='edge')
+            labels = [f"{(v.get_height() / 10000):.3f}m" for v in c]
+            ax.bar_label(c, labels=labels, label_type="edge")
 
     @staticmethod
     def linear_regression(x, y):
@@ -85,10 +85,10 @@ class Validation:
         Y = list(y.values.ravel())
         fig, ax = plt.subplots()
         plt.scatter(X, Y)
-        sm.graphics.abline_plot(model_results=model, color='red', ax=ax)
+        sm.graphics.abline_plot(model_results=model, color="red", ax=ax)
         plt.legend(["people with different characteristics", f"y = {model.params[1].round(5)}x"])
-        plt.text(0, 9000, f"R^2:{model.rsquared.round(5)}", bbox=dict(facecolor='blue', alpha=0.2))
-        # plt.text(0, 170000, f"y = {model.params[1].round(5)}x", bbox=dict(facecolor='blue', alpha=0.2))
+        plt.text(0, 9000, f"R^2:{model.rsquared.round(5)}", bbox=dict(facecolor="blue", alpha=0.2))
+        # plt.text(0, 170000, f"y = {model.params[1].round(5)}x", bbox=dict(facecolor="blue", alpha=0.2))
         plt.xlabel(xlabel=xlabel)
         plt.ylabel("Census")
         plt.title(title)

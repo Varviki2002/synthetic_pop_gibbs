@@ -7,7 +7,7 @@ from src.dataloader import Downloader
 
 import warnings
 
-warnings.filterwarnings('ignore')
+warnings.filterwarnings("ignore")
 
 from src import PROJECT_PATH
 

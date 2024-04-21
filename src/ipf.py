@@ -14,40 +14,38 @@ class IPF:
         self.province = province
         self.json_dict = json_dict
         self.table = table
-        self.seed = self.load_seed(df_indiv=self.table)
+        self.seed = self.__load_seed(dataframe=self.table)
 
     @staticmethod
     def unlistify(table, columns, sizes, values):
         """
         Converts an n-column table of counts into an n-dimensional array of counts
         """
-        pivot = table.pivot_table(index=columns, values=values, aggfunc='sum')
+        pivot = table.pivot_table(index=columns, values=values, aggfunc="sum")
         # order must be same as column order above
         array = np.zeros(sizes, dtype=int)
         array[tuple(pivot.index.codes)] = pivot.values.flat
         return array
 
     # Load seed from microsample
-    def load_seed(self, df_indiv):
-
-        n_sex = len(df_indiv['Sex'].unique())
-        n_age = len(df_indiv['agegrp'].unique())
-        n_hdgree = len(df_indiv['hdgree'].unique())
-        n_lfact = len(df_indiv['lfact'].unique())
-        n_hhsize = len(df_indiv['hhsize'].unique())
-        n_totinc = len(df_indiv['TotInc'].unique())
+    def __load_seed(self, dataframe):
+        n_sex = len(dataframe["Sex"].unique())
+        n_age = len(dataframe["agegrp"].unique())
+        n_hdgree = len(dataframe["hdgree"].unique())
+        n_lfact = len(dataframe["lfact"].unique())
+        n_hhsize = len(dataframe["hhsize"].unique())
+        n_totinc = len(dataframe["TotInc"].unique())
 
         cols = ["Sex", "agegrp", "hdgree", "lfact", "TotInc", "hhsize"]
         shape = [n_sex, n_age, n_hdgree, n_lfact, n_totinc, n_hhsize]
 
-        seed = self.unlistify(df_indiv, cols, shape, "weight")
+        seed = self.unlistify(dataframe, cols, shape, "weight")
+        seed = seed.astype(float) + 1.0
+        seed = seed * self.get_impossible(seed)
 
         # Convergence problems can occur when one of the rows is zero yet the marginal total is nonzero.
         # Can get round this by adding a small number to the seed effectively allowing zero states
         #  to be occupied with a finite probability
-        seed = seed.astype(float) + 1.0  # / np.sum(seed)
-        seed = seed * self.get_impossible(seed)
-
         return seed
 
     @staticmethod
@@ -132,7 +130,7 @@ class IPF:
         i6 = np.array([6])
 
         (marginal_sex, marginal_age, marginal_age_by_sex, marginal_hdgree,
-         marginal_hh_size, marginal_lfact, marginal_inc)= self.gather_marginals()
+         marginal_hh_size, marginal_lfact, marginal_inc) = self.gather_marginals()
 
         print("Apply IPF (could be replaced by qisi for more accurate.)")
         p = humanleague.ipf(self.seed, [i0, i1, i2, i3, i4, i5, i6],
@@ -140,11 +138,16 @@ class IPF:
                              marginal_age_by_sex.astype(float), marginal_hdgree.astype(float),
                              marginal_lfact.astype(float), marginal_inc.astype(float),
                              marginal_hh_size.astype(float)])
-        # p = np.load(os.path.join(PROJECT_PATH, 'generated/p.npy'))
+        # p = np.load(os.path.join(PROJECT_PATH, "generated/p.npy"))
         p_list = list(p)
         p_list[0] = self.probabilistic_sampling(p, total_pop)
 
         p = tuple(p_list)
+        return p
+
+    def create_syth_pop(self):
+
+        p = self.ipf()
 
         chunk = pd.DataFrame(
             columns=["Sex", "agegrp", "hdgree", "lfact", "TotInc", "hhsize", "province"])
@@ -152,19 +155,20 @@ class IPF:
         syn_inds = pd.DataFrame(columns=["Sex", "agegrp", "hdgree", "lfact", "TotInc", "hhsize", "province"])
 
         table = humanleague.flatten(p[0])
-        # table = np.load(os.path.join(PROJECT_PATH, 'generated/table.npy'))
+        # table = np.load(os.path.join(PROJECT_PATH, "generated/table.npy"))
         chunk.Sex = table[0]
         chunk.agegrp = table[1]
         chunk.hdgree = table[2]
         chunk.lfact = table[3]
         chunk.hhsize = table[5]
         chunk.TotInc = table[4]
-        chunk['province'] = self.province
+        chunk["province"] = self.province
         syn_inds = pd.concat([syn_inds, chunk], ignore_index=True)
         return syn_inds
 
+
 def main():
-    f = open(os.path.join(PROJECT_PATH, 'data/ipf_10.json'))
+    f = open(os.path.join(PROJECT_PATH, "data/ipf_10.json"))
     json_dict = json.load(f)
 
     data = Downloader.read_data(file=os.path.join(PROJECT_PATH, "data/Census_2016_Individual_PUMF.dta"))
@@ -172,10 +176,9 @@ def main():
     names = ["agegrp", "Sex", "hdgree", "lfact", "TotInc", "hhsize"]
 
     ipf = IPF(table=data, json_dict=json_dict, province=10)
-    ipf_data = ipf.ipf()
+    ipf_data = ipf.create_syth_pop()
     print(data)
+
 
 if __name__ == "__main__":
     main()
-
-

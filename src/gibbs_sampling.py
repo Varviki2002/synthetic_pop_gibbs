@@ -15,7 +15,7 @@ from src import PROJECT_PATH
 
 import warnings
 
-warnings.filterwarnings('ignore')
+warnings.filterwarnings("ignore")
 
 State = namedtuple("State", ["var", "state"])
 
@@ -33,7 +33,7 @@ class NewGibbsSampling(GibbsSampling):
     def _get_from_bayesian_model(self, model):
         """
         Computes the Gibbs transition models from a Bayesian Network.
-        'Probabilistic Graphical Model Principles and Techniques', Koller and
+        "Probabilistic Graphical Model Principles and Techniques", Koller and
         Friedman, Section 12.3.3 pp 512-513.
 
         Parameters
@@ -135,17 +135,17 @@ def main():
     partial = pd.read_csv(os.path.join(data_generated, "partial_cross_1.csv"), header=[0, 1, 2, 3], index_col=[0])
 
     student = BayesianNetwork([("agegrp", "Sex"), ("hdgree", "lfact"), ("TotInc", "hhsize")])
-    cpd_age = TabularCPD(variable='agegrp', variable_card=18, values=cond_1.values, evidence=evidence["agegrp"],
+    cpd_age = TabularCPD(variable="agegrp", variable_card=18, values=cond_1.values, evidence=evidence["agegrp"],
                          evidence_card=[2, 3, 3, 4, 5])
-    cpd_sex = TabularCPD(variable='Sex', variable_card=2, values=cond_2.values, evidence=evidence["Sex"],
+    cpd_sex = TabularCPD(variable="Sex", variable_card=2, values=cond_2.values, evidence=evidence["Sex"],
                          evidence_card=[18, 3, 3, 4, 5])
-    cpd_hdgree = TabularCPD(variable='hdgree', variable_card=3, values=cond_3.values, evidence=evidence["hdgree"],
+    cpd_hdgree = TabularCPD(variable="hdgree", variable_card=3, values=cond_3.values, evidence=evidence["hdgree"],
                             evidence_card=[18, 2, 3, 4, 5])
-    cpd_lfact = TabularCPD(variable='lfact', variable_card=3, values=cond_4.values, evidence=evidence["lfact"],
+    cpd_lfact = TabularCPD(variable="lfact", variable_card=3, values=cond_4.values, evidence=evidence["lfact"],
                            evidence_card=[18, 2, 3, 4, 5])
-    cpd_totinc = TabularCPD(variable='TotInc', variable_card=4, values=cond_5.values, evidence=evidence["TotInc"],
+    cpd_totinc = TabularCPD(variable="TotInc", variable_card=4, values=cond_5.values, evidence=evidence["TotInc"],
                             evidence_card=[18, 2, 3, 3, 5])
-    cpd_hhsize = TabularCPD(variable='hhsize', variable_card=5, values=cond_6.values, evidence=evidence["hhsize"],
+    cpd_hhsize = TabularCPD(variable="hhsize", variable_card=5, values=cond_6.values, evidence=evidence["hhsize"],
                             evidence_card=[18, 2, 3, 3, 4])
     student.add_cpds(cpd_age, cpd_sex, cpd_lfact, cpd_totinc, cpd_hdgree, cpd_hhsize)
 
@@ -158,7 +158,7 @@ def main():
     samples.to_csv(os.path.join(data_generated, "samples_10pr.csv"), index=False)
 
     population_partial = BayesianNetwork([("agegrp", "Sex"), ("hdgree", "lfact"), ("TotInc", "hhsize")])
-    cpd_partial_1 = TabularCPD(variable='agegrp', variable_card=18, values=partial.values,
+    cpd_partial_1 = TabularCPD(variable="agegrp", variable_card=18, values=partial.values,
                                evidence=evidence_partial_1["agegrp"], evidence_card=[3, 3, 4, 5])
     population_partial.add_cpds(cpd_partial_1, cpd_sex, cpd_lfact, cpd_totinc, cpd_hdgree, cpd_age)
     gibbs_chain_partial = NewGibbsSampling(evidence=evidence_partial_1, model=population_partial, partial=partial_1)
