@@ -14,7 +14,7 @@ class IPF:
         self.province = province
         self.json_dict = json_dict
         self.table = table
-        self.seed = self.__load_seed(dataframe=self.table)
+        self.seed = self._load_seed(dataframe=self.table)
 
     @staticmethod
     def unlistify(table, columns, sizes, values):
@@ -28,7 +28,7 @@ class IPF:
         return array
 
     # Load seed from microsample
-    def __load_seed(self, dataframe):
+    def _load_seed(self, dataframe):
         n_sex = len(dataframe["Sex"].unique())
         n_age = len(dataframe["agegrp"].unique())
         n_hdgree = len(dataframe["hdgree"].unique())
@@ -145,14 +145,14 @@ class IPF:
         p = tuple(p_list)
         return p
 
-    def create_syth_pop(self):
+    def create_synth_pop(self):
 
         p = self.ipf()
 
         chunk = pd.DataFrame(
             columns=["Sex", "agegrp", "hdgree", "lfact", "TotInc", "hhsize", "province"])
 
-        syn_inds = pd.DataFrame(columns=["Sex", "agegrp", "hdgree", "lfact", "TotInc", "hhsize", "province"])
+        syn_pop = pd.DataFrame(columns=["Sex", "agegrp", "hdgree", "lfact", "TotInc", "hhsize", "province"])
 
         table = humanleague.flatten(p[0])
         # table = np.load(os.path.join(PROJECT_PATH, "generated/table.npy"))
@@ -163,8 +163,8 @@ class IPF:
         chunk.hhsize = table[5]
         chunk.TotInc = table[4]
         chunk["province"] = self.province
-        syn_inds = pd.concat([syn_inds, chunk], ignore_index=True)
-        return syn_inds
+        syn_pop = pd.concat([syn_pop, chunk], ignore_index=True)
+        return syn_pop
 
 
 def main():
@@ -176,7 +176,7 @@ def main():
     names = ["agegrp", "Sex", "hdgree", "lfact", "TotInc", "hhsize"]
 
     ipf = IPF(table=data, json_dict=json_dict, province=10)
-    ipf_data = ipf.create_syth_pop()
+    ipf_data = ipf.create_synth_pop()
     print(data)
 
 
