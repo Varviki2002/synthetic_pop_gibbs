@@ -1,6 +1,7 @@
 import os
 
 import itertools
+import numpy as np
 import pandas as pd
 
 import warnings
@@ -8,11 +9,12 @@ import warnings
 warnings.filterwarnings("ignore")
 
 from src import PROJECT_PATH
+from src.dataloader import Downloader
 
 
 class CondCreat:
     def __init__(self, table, full_evidence, partial_evidence, full_names, partial_1, save):
-        self.table = table
+        self.table = self._create_sample_table(table)
         self.full_evidence = full_evidence
         self.partial_evidence = partial_evidence
         self.full_names = full_names
@@ -35,6 +37,13 @@ class CondCreat:
 
         if save is True:
             self._save_full_cond_tables()
+
+    @staticmethod
+    def _create_sample_table(table):
+        index = table.index.to_list()
+        choice = list(np.random.choice(index, size=183320, replace=False))
+        table = table[table.index.isin(choice)]
+        return table
 
     @staticmethod
     def calculate_cond_table(lista, df):
@@ -95,3 +104,26 @@ class CondCreat:
         cond_5.to_csv(os.path.join(data_generated, "full_cross_table_5.csv"))
         cond_6.to_csv(os.path.join(data_generated, "full_cross_table_6.csv"))
         cond_partial_1.to_csv(os.path.join(data_generated, "partial_cross_1.csv"))
+
+def main():
+    data = Downloader.read_data(file=os.path.join(PROJECT_PATH, "data/Census_2016_Individual_PUMF.dta"))
+    names = ["agegrp", "Sex", "hdgree", "lfact", "TotInc", "hhsize"]
+    partial_1 = ["agegrp", "hdgree", "lfact", "TotInc", "hhsize"]
+
+    evidence = {"agegrp": ["Sex", "hdgree", "lfact", "TotInc", "hhsize"],
+                "Sex": ["agegrp", "hdgree", "lfact", "TotInc", "hhsize"],
+                "hdgree": ["agegrp", "Sex", "lfact", "TotInc", "hhsize"],
+                "lfact": ["agegrp", "Sex", "hdgree", "TotInc", "hhsize"],
+                "TotInc": ["agegrp", "Sex", "hdgree", "lfact", "hhsize"],
+                "hhsize": ["agegrp", "Sex", "hdgree", "lfact", "TotInc"]}
+
+    evidence_partial_1 = {"agegrp": ["hdgree", "lfact", "TotInc", "hhsize"],
+                          "Sex": ["agegrp", "hdgree", "lfact", "TotInc", "hhsize"],
+                          "hdgree": ["agegrp", "Sex", "lfact", "TotInc", "hhsize"],
+                          "lfact": ["agegrp", "Sex", "hdgree", "TotInc", "hhsize"],
+                          "TotInc": ["agegrp", "Sex", "hdgree", "lfact", "hhsize"],
+                          "hhsize": ["agegrp", "Sex", "hdgree", "lfact", "TotInc"]}
+    cla = CondCreat(table=data, full_evidence=evidence, partial_evidence=evidence_partial_1, full_names=names,
+                    save=True, partial_1=partial_1)
+if __name__ == "__main__":
+    main()

@@ -1,6 +1,7 @@
 import os
 
 import gdown
+import numpy as np
 import pandas as pd
 import pyreadstat
 
@@ -18,17 +19,17 @@ class Downloader:
         :param str gdrive_id: Google Drive id
         :param str file_name: file name for saving
         """
-        if (os.path.exists(PROJECT_PATH + "data/" + file_name) or
-                os.path.exists(PROJECT_PATH + "generated/" + file_name)):
-            if gdrive_id is not None and file_name is not None:
-                gdrive_link = "https://drive.google.com/uc?export=download&id="
-                data_folder = os.path.join(PROJECT_PATH, "data")
-                data_generated = os.path.join(PROJECT_PATH, "generated")
-                os.makedirs(data_generated, exist_ok=True)
-                os.makedirs(data_folder, exist_ok=True)
-                file = os.path.join(data_folder, file_name)
-                url = gdrive_link + gdrive_id
-                gdown.download(url, file)
+        # if (os.path.exists(PROJECT_PATH + "data/" + file_name) or
+        #         os.path.exists(PROJECT_PATH + "generated/" + file_name)):
+        if gdrive_id is not None and file_name is not None:
+            gdrive_link = "https://drive.google.com/uc?export=download&id="
+            data_folder = os.path.join(PROJECT_PATH, "data")
+            data_generated = os.path.join(PROJECT_PATH, "generated")
+            os.makedirs(data_generated, exist_ok=True)
+            os.makedirs(data_folder, exist_ok=True)
+            file = os.path.join(data_folder, file_name)
+            url = gdrive_link + gdrive_id
+            gdown.download(url, file)
 
     @staticmethod
     def read_data(file, province=None):

@@ -14,7 +14,8 @@ from src.dataloader import Downloader
 
 
 class Validation:
-    def __init__(self, creat_class: CondCreat, names):
+    def __init__(self, creat_class: CondCreat, names, table):
+        self.table = table
         self.names = names
         self.creat_class = creat_class
         self.ipf_10pr = pd.read_csv(os.path.join(PROJECT_PATH, "data/ipf_10pr.csv"))
@@ -24,7 +25,7 @@ class Validation:
         self.census = self.creat_class.table
         self.gibbs_partial_1 = pd.read_csv(os.path.join(PROJECT_PATH, "generated/samples_partial.csv"))
 
-        self.cross_census = self.creat_class._create_cross_tables(table=self.creat_class.table, name_list=self.names,
+        self.cross_census = self.creat_class._create_cross_tables(table=self.table, name_list=self.names,
                                                                   idx=0, value=None, aggfunc=None)
         self.cross_gibbs = self.creat_class._create_cross_tables(table=self.gibbs_data, name_list=self.names, idx=0,
                                                                  value=None, aggfunc=None)
@@ -33,7 +34,7 @@ class Validation:
         # self.cross_ipf = self.creat_class.create_cross_tables(self.gibbs_data, self.names, 0, None, "count")
 
     def create_columns(self, col_name, dict_1, dict_2):
-        tab_1 = self.census[col_name].value_counts(sort=False)
+        tab_1 = self.table[col_name].value_counts(sort=False)
         tab_2 = self.gibbs_data[col_name].value_counts(sort=False)
 
         dict_1["count"] = tab_1
@@ -129,3 +130,44 @@ class Validation:
         rae = self.calculate_rae(census=census, simulation=simulation)
         return r, nrmse, rae
 
+def main():
+    data = Downloader.read_data(file=os.path.join(PROJECT_PATH, "data/Census_2016_Individual_PUMF.dta"))
+    names = ["agegrp", "Sex", "hdgree", "lfact", "TotInc", "hhsize"]
+    partial_1 = ["agegrp", "hdgree", "lfact", "TotInc", "hhsize"]
+    evidence = {"agegrp": ["Sex", "hdgree", "lfact", "TotInc", "hhsize"],
+                "Sex": ["agegrp", "hdgree", "lfact", "TotInc", "hhsize"],
+                "hdgree": ["agegrp", "Sex", "lfact", "TotInc", "hhsize"],
+                "lfact": ["agegrp", "Sex", "hdgree", "TotInc", "hhsize"],
+                "TotInc": ["agegrp", "Sex", "hdgree", "lfact", "hhsize"],
+                "hhsize": ["agegrp", "Sex", "hdgree", "lfact", "TotInc"]}
+    evidence_partial_1 = {"agegrp": ["hdgree", "lfact", "TotInc", "hhsize"],
+                          "Sex": ["agegrp", "hdgree", "lfact", "TotInc", "hhsize"],
+                          "hdgree": ["agegrp", "Sex", "lfact", "TotInc", "hhsize"],
+                          "lfact": ["agegrp", "Sex", "hdgree", "TotInc", "hhsize"],
+                          "TotInc": ["agegrp", "Sex", "hdgree", "lfact", "hhsize"],
+                          "hhsize": ["agegrp", "Sex", "hdgree", "lfact", "TotInc"]}
+    gender_1 = {"Sex": ["female", "male"]}
+    gender_2 = {"Sex": ["female", "male"]}
+    age_group_1 = {"agegrp": ["0-4", "5-9", "10-14", "15-19", "20-24", "25-29", "30-34", "40-44", "45-49", "50-59",
+                              "60-64", "65-69", "70-74", "75-79" "80-84", "85-89", "90-94", "95-99", "100"]}
+    age_group_2 = {"agegrp": ["0-4", "5-9", "10-14", "15-19", "20-24", "25-29", "30-34", "40-44", "45-49", "50-59",
+                              "60-64", "65-69", "70-74", "75-79" "80-84", "85-89", "90-94", "95-99", "100"]}
+    hdgree_1 = {"hdgree": ["no", "secondary", "university"]}
+    hdgree_2 = {"hdgree": ["no", "secondary", "university"]}
+    hhsize_1 = {"hhsize": ["1", "2", "3", "4", "5+"]}
+    hhsize_2 = {"hhsize": ["1", "2", "3", "4", "5+"]}
+    validation = Validation(creat_class=CondCreat(table=data, full_evidence=evidence,partial_evidence=evidence_partial_1,
+                                                  full_names=names, save=False, partial_1=partial_1),
+                            names=names, table=data)
+    validation.plot_figures(col_name="Sex", dict_1=gender_1, dict_2=gender_2)
+    validation.plot_figures(col_name="agegrp", dict_1=age_group_1, dict_2=age_group_2)
+    validation.plot_figures(col_name="hdgree", dict_1=hdgree_1, dict_2=hdgree_2)
+    validation.plot_figures(col_name="hhsize", dict_1=hhsize_1, dict_2=hhsize_2)
+    plt.show()
+    validation.plot_lin_regression(x=validation.cross_gibbs, y=validation.cross_census,
+                                   xlabel="Simulation", title="Full conditionals")
+    r, nrmse, rae = validation.run_calculations(census=validation.cross_census, simulation=validation.cross_gibbs)
+    validation.plot_lin_regression(x=validation.cross_partial_1, y=validation.cross_census,
+                                   xlabel="Simulation", title="Partial_1")
+if __name__ == "__main__":
+    main()
