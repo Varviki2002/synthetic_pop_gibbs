@@ -25,12 +25,12 @@ class Validation:
         self.census = self.creat_class.table
         self.gibbs_partial_1 = pd.read_csv(os.path.join(PROJECT_PATH, "generated/samples_partial.csv"))
 
-        self.cross_census = self.creat_class._create_cross_tables(table=self.table, name_list=self.names,
-                                                                  idx=0, value=None, aggfunc=None)
-        self.cross_gibbs = self.creat_class._create_cross_tables(table=self.gibbs_data, name_list=self.names, idx=0,
-                                                                 value=None, aggfunc=None)
-        self.cross_partial_1 = self.creat_class._create_cross_tables(table=self.gibbs_partial_1, name_list=self.names,
-                                                                     idx=0, value=None, aggfunc=None)
+        self.cross_census = self.creat_class.create_cross_tables(table=self.table, name_list=self.names,
+                                                                 idx=0, value=None, aggfunc=None)
+        self.cross_gibbs = self.creat_class.create_cross_tables(table=self.gibbs_data, name_list=self.names, idx=0,
+                                                                value=None, aggfunc=None)
+        self.cross_partial_1 = self.creat_class.create_cross_tables(table=self.gibbs_partial_1, name_list=self.names,
+                                                                    idx=0, value=None, aggfunc=None)
         # self.cross_ipf = self.creat_class.create_cross_tables(self.gibbs_data, self.names, 0, None, "count")
 
     def create_columns(self, col_name, dict_1, dict_2):
@@ -70,22 +70,22 @@ class Validation:
 
     @staticmethod
     def linear_regression(x, y):
-        X = list(x.values.ravel())
-        Y = list(y.values.ravel())
+        x_reg = list(x.values.ravel())
+        y_reg = list(y.values.ravel())
 
-        X = sm.add_constant(X)
+        x_reg = sm.add_constant(x_reg)
 
-        model = sm.OLS(Y, X).fit()
-        predictions = model.predict(X)
+        model = sm.OLS(y_reg, x_reg).fit()
+        # predictions = model.predict(x_reg)
 
         return model
 
     def plot_lin_regression(self, x, y, xlabel, title=None):
         model = self.linear_regression(x=x, y=y)
-        X = list(x.values.ravel())
-        Y = list(y.values.ravel())
+        x_reg = list(x.values.ravel())
+        y_reg = list(y.values.ravel())
         fig, ax = plt.subplots()
-        plt.scatter(X, Y)
+        plt.scatter(x_reg, y_reg)
         sm.graphics.abline_plot(model_results=model, color="red", ax=ax)
         plt.legend(["people with different characteristics", f"y = {model.params[1].round(5)}x"])
         plt.text(0, 9000, f"R^2:{model.rsquared.round(5)}", bbox=dict(facecolor="blue", alpha=0.2))
@@ -130,6 +130,7 @@ class Validation:
         rae = self.calculate_rae(census=census, simulation=simulation)
         return r, nrmse, rae
 
+
 def main():
     data = Downloader.read_data(file=os.path.join(PROJECT_PATH, "data/Census_2016_Individual_PUMF.dta"))
     names = ["agegrp", "Sex", "hdgree", "lfact", "TotInc", "hhsize"]
@@ -156,7 +157,8 @@ def main():
     hdgree_2 = {"hdgree": ["no", "secondary", "university"]}
     hhsize_1 = {"hhsize": ["1", "2", "3", "4", "5+"]}
     hhsize_2 = {"hhsize": ["1", "2", "3", "4", "5+"]}
-    validation = Validation(creat_class=CondCreat(table=data, full_evidence=evidence,partial_evidence=evidence_partial_1,
+    validation = Validation(creat_class=CondCreat(table=data, full_evidence=evidence,
+                                                  partial_evidence=evidence_partial_1,
                                                   full_names=names, save=False, partial_1=partial_1),
                             names=names, table=data)
     validation.plot_figures(col_name="Sex", dict_1=gender_1, dict_2=gender_2)
@@ -169,5 +171,7 @@ def main():
     r, nrmse, rae = validation.run_calculations(census=validation.cross_census, simulation=validation.cross_gibbs)
     validation.plot_lin_regression(x=validation.cross_partial_1, y=validation.cross_census,
                                    xlabel="Simulation", title="Partial_1")
+
+
 if __name__ == "__main__":
     main()

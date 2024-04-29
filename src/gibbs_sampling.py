@@ -1,27 +1,20 @@
-import os
-import pandas as pd
-from src import PROJECT_PATH
-from pgmpy.factors.discrete import (TabularCPD)
-from pgmpy.models import BayesianNetwork
-
-from src import PROJECT_PATH
-from src.create_synth_pop import CondCreat
-from src.dataloader import Downloader
-from src.validation import Validation
-
 from collections import namedtuple
 import itertools
+import os
+import warnings
+
 import numpy as np
+import pandas as pd
+from pgmpy.factors.discrete import (TabularCPD)
 from pgmpy.models import BayesianNetwork
 from pgmpy.sampling import _return_samples
 from pgmpy.sampling.Sampling import GibbsSampling
 from pgmpy.utils.mathext import sample_discrete
 from tqdm.auto import tqdm
 
-import warnings
+from src import PROJECT_PATH
 
 warnings.filterwarnings("ignore")
-
 State = namedtuple(typename="State", field_names=["var", "state"])
 
 
@@ -112,6 +105,7 @@ class NewGibbsSampling(GibbsSampling):
             samples_df.drop(self.latents, axis=1, inplace=True)
         return samples_df
 
+
 def main():
     evidence = {"agegrp": ["Sex", "hdgree", "lfact", "TotInc", "hhsize"],
                 "Sex": ["agegrp", "hdgree", "lfact", "TotInc", "hhsize"],
@@ -174,6 +168,7 @@ def main():
     samples_partial = samples_partial.iloc[::10, :]
     print(samples_partial.shape)
     samples_partial.to_csv(os.path.join(data_generated, "samples_partial.csv"), index=False)
+
 
 if __name__ == "__main__":
     main()

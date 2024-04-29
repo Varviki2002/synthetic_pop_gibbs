@@ -6,10 +6,10 @@ import pandas as pd
 
 import warnings
 
-warnings.filterwarnings("ignore")
-
 from src import PROJECT_PATH
 from src.dataloader import Downloader
+
+warnings.filterwarnings("ignore")
 
 
 class CondCreat:
@@ -19,21 +19,21 @@ class CondCreat:
         self.partial_evidence = partial_evidence
         self.full_names = full_names
         self.partial_names_1 = partial_1
-        self.full_cross_1 = self._create_cross_tables(table=self.table, name_list=self.full_names, idx=0,
-                                                      value=self.table["weight"], aggfunc="sum")
-        self.full_cross_2 = self._create_cross_tables(table=self.table, name_list=self.full_names, idx=1,
-                                                      value=self.table["weight"], aggfunc="sum")
-        self.full_cross_3 = self._create_cross_tables(table=self.table, name_list=self.full_names, idx=2,
-                                                      value=self.table["weight"], aggfunc="sum")
-        self.full_cross_4 = self._create_cross_tables(table=self.table, name_list=self.full_names, idx=3,
-                                                      value=self.table["weight"], aggfunc="sum")
-        self.full_cross_5 = self._create_cross_tables(table=self.table, name_list=self.full_names, idx=4,
-                                                      value=self.table["weight"], aggfunc="sum")
-        self.full_cross_6 = self._create_cross_tables(table=self.table, name_list=self.full_names, idx=5,
-                                                      value=self.table["weight"], aggfunc="sum")
+        self.full_cross_1 = self.create_cross_tables(table=self.table, name_list=self.full_names, idx=0,
+                                                     value=self.table["weight"], aggfunc="sum")
+        self.full_cross_2 = self.create_cross_tables(table=self.table, name_list=self.full_names, idx=1,
+                                                     value=self.table["weight"], aggfunc="sum")
+        self.full_cross_3 = self.create_cross_tables(table=self.table, name_list=self.full_names, idx=2,
+                                                     value=self.table["weight"], aggfunc="sum")
+        self.full_cross_4 = self.create_cross_tables(table=self.table, name_list=self.full_names, idx=3,
+                                                     value=self.table["weight"], aggfunc="sum")
+        self.full_cross_5 = self.create_cross_tables(table=self.table, name_list=self.full_names, idx=4,
+                                                     value=self.table["weight"], aggfunc="sum")
+        self.full_cross_6 = self.create_cross_tables(table=self.table, name_list=self.full_names, idx=5,
+                                                     value=self.table["weight"], aggfunc="sum")
 
-        self.partial_cross_1 = self._create_cross_tables(table=self.table, name_list=self.partial_names_1,
-                                                         idx=0, value=self.table["weight"], aggfunc="sum")
+        self.partial_cross_1 = self.create_cross_tables(table=self.table, name_list=self.partial_names_1,
+                                                        idx=0, value=self.table["weight"], aggfunc="sum")
 
         if save is True:
             self._save_full_cond_tables()
@@ -54,7 +54,7 @@ class CondCreat:
         return new_df
 
     @staticmethod
-    def _create_cross_tables(table, name_list, idx, value, aggfunc):
+    def create_cross_tables(table, name_list, idx, value, aggfunc):
         index = name_list[idx]
         column = [table[v] for v in name_list if name_list[idx] != v]
 
@@ -105,6 +105,7 @@ class CondCreat:
         cond_6.to_csv(os.path.join(data_generated, "full_cross_table_6.csv"))
         cond_partial_1.to_csv(os.path.join(data_generated, "partial_cross_1.csv"))
 
+
 def main():
     data = Downloader.read_data(file=os.path.join(PROJECT_PATH, "data/Census_2016_Individual_PUMF.dta"))
     names = ["agegrp", "Sex", "hdgree", "lfact", "TotInc", "hhsize"]
@@ -125,5 +126,7 @@ def main():
                           "hhsize": ["agegrp", "Sex", "hdgree", "lfact", "TotInc"]}
     cla = CondCreat(table=data, full_evidence=evidence, partial_evidence=evidence_partial_1, full_names=names,
                     save=True, partial_1=partial_1)
+
+
 if __name__ == "__main__":
     main()

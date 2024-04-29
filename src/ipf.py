@@ -1,6 +1,6 @@
 import os
 
-# import humanleague
+import humanleague
 import json
 import numpy as np
 import pandas as pd
@@ -173,10 +173,9 @@ def main():
 
     data = Downloader.read_data(file=os.path.join(PROJECT_PATH, "data/Census_2016_Individual_PUMF.dta"))
 
-    names = ["agegrp", "Sex", "hdgree", "lfact", "TotInc", "hhsize"]
-
-    ipf = IPF(table=data, json_dict=json_dict, province=10)
-    ipf_data = ipf.create_synth_pop()
+    # names = ["agegrp", "Sex", "hdgree", "lfact", "TotInc", "hhsize"]
+    # ipf = IPF(table=data, json_dict=json_dict, province=10)
+    # ipf_data = ipf.create_synth_pop()
     print(data)
 
 

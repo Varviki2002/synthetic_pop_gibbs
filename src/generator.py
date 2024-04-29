@@ -1,6 +1,6 @@
 import os
-
 import json
+
 import matplotlib.pyplot as plt
 import pandas as pd
 from pgmpy.factors.discrete import (TabularCPD)
@@ -39,7 +39,8 @@ class SyntheticPopulationGenerator:
                         save=True, partial_1=self.partial_1)
 
         return cla
-    def run_gibbs_sampling_census(self, partial_cond):
+
+    def run_gibbs_sampling_census(self):
         data_generated = os.path.join(PROJECT_PATH, "generated")
         cond_1 = pd.read_csv(os.path.join(data_generated, "full_cross_table_1.csv"), header=[0, 1, 2, 3, 4],
                              index_col=[0])
@@ -111,7 +112,8 @@ class SyntheticPopulationGenerator:
         validation = Validation(
             creat_class=CondCreat(table=self.table, full_evidence=self.full_evidence,
                                   partial_evidence=self.partial_evidence, full_names=self.full_names,
-                                  save=False, partial_1=self.partial_1), names=self.full_names)
+                                  save=False, partial_1=self.partial_1),
+            names=self.full_names)
         validation.plot_figures(col_name="Sex", dict_1=gender_1, dict_2=gender_2)
         validation.plot_figures(col_name="agegrp", dict_1=age_group_1, dict_2=age_group_2)
         validation.plot_figures(col_name="hdgree", dict_1=hdgree_1, dict_2=hdgree_2)
@@ -119,7 +121,6 @@ class SyntheticPopulationGenerator:
 
         validation.plot_lin_regression(x=validation.cross_gibbs, y=validation.cross_census,
                                        xlabel="Simulation", title="Full conditionals")
-
 
         validation.plot_lin_regression(x=validation.cross_partial_1, y=validation.cross_census,
                                        xlabel="Simulation", title="Partial_1")
@@ -141,10 +142,5 @@ def main():
     generate_synth.run_validation()
 
 
-
-
-
 if __name__ == "__main__":
     main()
-
-
