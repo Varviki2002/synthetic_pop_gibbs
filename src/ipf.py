@@ -97,7 +97,8 @@ class IPF:
         # 0:0-4y ... 17: 85+
         marginal_age = np.array(list(total_age.values()))
         # 0: F age, 1: M age
-        marginal_age_by_sex = np.array([list(total_age_f.values()), list(total_age_m.values())])
+        marginal_age_by_sex = np.array([list(total_age_f.values()),
+                                        list(total_age_m.values())])
         # 0: no, 1:secondary, 2: university
         marginal_hdgree = np.array(list(total_hdgree.values()))
         # 0: employed, 1:unemployed, 2: not in labour force
@@ -133,11 +134,12 @@ class IPF:
          marginal_hh_size, marginal_lfact, marginal_inc) = self.gather_marginals()
 
         print("Apply IPF (could be replaced by qisi for more accurate.)")
-        p = humanleague.ipf(self.seed, [i0, i1, i2, i3, i4, i5, i6],
-                            [marginal_sex.astype(float), marginal_age.astype(float),
-                             marginal_age_by_sex.astype(float), marginal_hdgree.astype(float),
-                             marginal_lfact.astype(float), marginal_inc.astype(float),
-                             marginal_hh_size.astype(float)])
+        p = humanleague.ipf(
+            self.seed, indices=[i0, i1, i2, i3, i4, i5, i6],
+            marginals=[marginal_sex.astype(float), marginal_age.astype(float),
+                       marginal_age_by_sex.astype(float), marginal_hdgree.astype(float),
+                       marginal_lfact.astype(float), marginal_inc.astype(float),
+                       marginal_hh_size.astype(float)])
         # p = np.load(os.path.join(PROJECT_PATH, "generated/p.npy"))
         p_list = list(p)
         p_list[0] = self.probabilistic_sampling(p, total_pop)
@@ -146,7 +148,6 @@ class IPF:
         return p
 
     def create_synth_pop(self):
-
         p = self.ipf()
 
         chunk = pd.DataFrame(
