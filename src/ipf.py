@@ -6,14 +6,16 @@ import numpy as np
 import pandas as pd
 
 from src import PROJECT_PATH
+from src.create_synth_pop import CondCreat
 from src.dataloader import Downloader
 
 
 class IPF:
-    def __init__(self, table, json_dict, province):
+    def __init__(self, table, json_dict, province=None, size=1):
+        self.size = round(len(table) * size)
         self.province = province
         self.json_dict = json_dict
-        self.table = table
+        self.table = CondCreat.create_sample_table(table=table, size=self.size)
         self.seed = self._load_seed(dataframe=self.table)
 
     @staticmethod
@@ -113,11 +115,13 @@ class IPF:
     @staticmethod
     def probabilistic_sampling(p, total_pop):
         probas = np.float64(p[0]).ravel()
-        probas /= np.sum(probas)
-        selected = np.random.choice(len(probas), total_pop, True, probas)
-        result = np.zeros(p[0].shape, np.uint8)
-        result.ravel()[selected] = 1
-        return result
+        selected = list(np.random.choice(len(probas), total_pop, True, probas))
+        count_list = []
+        for i in range(6480):
+            temp_count = selected.count(i)
+            count_list.append(temp_count)
+        count_list = np.array(count_list)
+        return count_list.reshape(2, 18, 3, 3, 4, 5)
 
     def ipf(self):
         total_pop = self.json_dict["total_pop"]
@@ -125,10 +129,10 @@ class IPF:
         i0 = np.array([0])
         i1 = np.array([1])
         i2 = np.array([0, 1])
-        i3 = np.array([3])
-        i4 = np.array([4])
-        i5 = np.array([5])
-        i6 = np.array([6])
+        i3 = np.array([2])
+        i4 = np.array([3])
+        i5 = np.array([4])
+        i6 = np.array([5])
 
         (marginal_sex, marginal_age, marginal_age_by_sex, marginal_hdgree,
          marginal_hh_size, marginal_lfact, marginal_inc) = self.gather_marginals()
@@ -156,28 +160,30 @@ class IPF:
         syn_pop = pd.DataFrame(columns=["Sex", "agegrp", "hdgree", "lfact", "TotInc", "hhsize", "province"])
 
         table = humanleague.flatten(p[0])
-        # table = np.load(os.path.join(PROJECT_PATH, "generated/table.npy"))
         chunk.Sex = table[0]
         chunk.agegrp = table[1]
         chunk.hdgree = table[2]
         chunk.lfact = table[3]
-        chunk.hhsize = table[5]
         chunk.TotInc = table[4]
-        chunk["province"] = self.province
+        chunk.hhsize = table[5]
+        if self.province is None:
+            chunk.drop(labels=["province"], axis=1, inplace=True)
+            syn_pop.drop(labels=["province"], axis=1, inplace=True)
+        else:
+            chunk["province"] = self.province
         syn_pop = pd.concat([syn_pop, chunk], ignore_index=True)
         return syn_pop
 
 
 def main():
-    f = open(os.path.join(PROJECT_PATH, "data/ipf_10.json"))
+    f = open(os.path.join(PROJECT_PATH, "data/ipf_marginal.json"))
     json_dict = json.load(f)
 
     data = Downloader.read_data(file=os.path.join(PROJECT_PATH, "data/Census_2016_Individual_PUMF.dta"))
 
     # names = ["agegrp", "Sex", "hdgree", "lfact", "TotInc", "hhsize"]
-    # ipf = IPF(table=data, json_dict=json_dict, province=10)
+    # ipf = IPF(table=data, json_dict=json_dict, province=10, size=0.2)
     # ipf_data = ipf.create_synth_pop()
-    print(data)
 
 
 if __name__ == "__main__":

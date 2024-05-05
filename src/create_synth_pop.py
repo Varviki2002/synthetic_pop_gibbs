@@ -13,8 +13,9 @@ warnings.filterwarnings("ignore")
 
 
 class CondCreat:
-    def __init__(self, table, full_evidence, partial_evidence, full_names, partial_1, save):
-        self.table = self._create_sample_table(table)
+    def __init__(self, table, full_evidence, partial_evidence, full_names, partial_1, save, size):
+        self.size = round(len(table)*size)
+        self.table = self.create_sample_table(table=table, size=self.size)
         self.full_evidence = full_evidence
         self.partial_evidence = partial_evidence
         self.full_names = full_names
@@ -39,9 +40,9 @@ class CondCreat:
             self._save_full_cond_tables()
 
     @staticmethod
-    def _create_sample_table(table):
+    def create_sample_table(table, size):
         index = table.index.to_list()
-        choice = list(np.random.choice(index, size=183320, replace=False))
+        choice = list(np.random.choice(index, size=size, replace=False))
         table = table[table.index.isin(choice)]
         return table
 
@@ -125,7 +126,7 @@ def main():
                           "TotInc": ["agegrp", "Sex", "hdgree", "lfact", "hhsize"],
                           "hhsize": ["agegrp", "Sex", "hdgree", "lfact", "TotInc"]}
     cla = CondCreat(table=data, full_evidence=evidence, partial_evidence=evidence_partial_1, full_names=names,
-                    save=True, partial_1=partial_1)
+                    save=True, partial_1=partial_1, size=0.2)
 
 
 if __name__ == "__main__":

@@ -18,8 +18,8 @@ class Validation:
         self.table = table
         self.names = names
         self.creat_class = creat_class
-        self.ipf_10pr = pd.read_csv(os.path.join(PROJECT_PATH, "data/ipf_10pr.csv"))
-        # self.ipf_data.drop([self.ipf_data.columns[0]], inplace=True, axis=1)
+        self.ipf_10pr = pd.read_csv(os.path.join(PROJECT_PATH, "generated/ipf_marginal.csv"))
+        self.ipf_10pr.drop([self.ipf_10pr.columns[0]], inplace=True, axis=1)
         self.gibbs_10pr = pd.read_csv(os.path.join(PROJECT_PATH, "generated/samples_10pr.csv"))
         self.gibbs_data = pd.read_csv(os.path.join(PROJECT_PATH, "generated/samples.csv"))
         self.census = self.creat_class.table
@@ -34,7 +34,7 @@ class Validation:
         self.cross_partial_1 = self.creat_class.create_cross_tables(
             table=self.gibbs_partial_1, name_list=self.names,
             idx=0, value=None, aggfunc=None)
-        # self.cross_ipf = self.creat_class.create_cross_tables(self.gibbs_data, self.names, 0, None, "count")
+        self.cross_ipf = self.creat_class.create_cross_tables(self.ipf_10pr, self.names, 0, None, None)
 
     def create_columns(self, col_name, dict_1, dict_2):
         tab_1 = self.table[col_name].value_counts(sort=False)
@@ -183,7 +183,7 @@ def main():
         census=validation.cross_census,
         simulation=validation.cross_gibbs)
     validation.plot_lin_regression(
-        x=validation.cross_partial_1, y=validation.cross_census,
+        x=validation.cross_ipf, y=validation.cross_census,
         xlabel="Simulation", title="Partial_1")
 
 

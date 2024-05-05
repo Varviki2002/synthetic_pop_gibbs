@@ -17,19 +17,22 @@ warnings.filterwarnings("ignore")
 
 
 class SyntheticPopulationGenerator:
-    def __init__(self, full_names, partial_1):
+    def __init__(self, full_names, partial_1, size):
         Downloader(gdrive_id="1fni7wudNdWjy5BsPpNXaxLGshyNtiapK",
-                   file_name="Census_2016_Individual_PUMF.dta")
+                   file_name="Census_2016_Individual_PUMF.dta",
+                   download=True)
         Downloader(gdrive_id="1JCPZtvA3oxdBFRjB_MTB3AWVz02zz3Z8",
-                   file_name="ipf_10.json")
+                   file_name="ipf_10.json", download=True)
         Downloader(gdrive_id="1vbMwVXsVg8mFDUxq-ioPpVZPt6Wrmqwv",
-                   file_name="da_10.json")
+                   file_name="da_10.json", download=True)
         Downloader(gdrive_id="1B0vWMONt6MFSzld_CghvzQMN_iyH1I7R",
-                   file_name="ipf_10pr.csv")
+                   file_name="ipf_10pr.csv", download=True)
         Downloader(gdrive_id="1IKBeruFOMWjriZWYGvZs3mf77-M5bnLl",
-                   file_name="evidence_partial_1.json")
+                   file_name="evidence_partial_1.json", download=True)
         Downloader(gdrive_id="1UTLwhVQdAmx8xj9iufmOkEYAUi1CoySB",
-                   file_name="evidence.json")
+                   file_name="evidence.json", download=True)
+        Downloader(gdrive_id="1OuPuQx9-6v0PXB82e0UGuV3cwiz3Rzq0",
+                   file_name="marginal_ipf.json", download=True)
 
         self.table = Downloader.read_data(
             file=os.path.join(PROJECT_PATH, "data/Census_2016_Individual_PUMF.dta"))
@@ -39,11 +42,12 @@ class SyntheticPopulationGenerator:
             self.partial_evidence = json.load(json_fil)
         self.full_names = full_names
         self.partial_1 = partial_1
+        self.size = size
 
     def run_cond_creat(self):
         cla = CondCreat(table=self.table, full_evidence=self.full_evidence,
                         partial_evidence=self.partial_evidence, full_names=self.full_names,
-                        save=True, partial_1=self.partial_1)
+                        save=True, partial_1=self.partial_1, size=self.size)
 
         return cla
 
