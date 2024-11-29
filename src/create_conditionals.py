@@ -126,7 +126,7 @@ def main():
                           "TotInc": ["agegrp", "Sex", "hdgree", "lfact", "hhsize"],
                           "hhsize": ["agegrp", "Sex", "hdgree", "lfact", "TotInc"]}
     cla = CondCreat(table=data, full_evidence=evidence, partial_evidence=evidence_partial_1, full_names=names,
-                    save=True, partial_1=partial_1, size=0.2)
+                    save=True, partial_1=partial_1, size=0.05)
 
 
 if __name__ == "__main__":

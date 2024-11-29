@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 
 from src import PROJECT_PATH
-from src.create_synth_pop import CondCreat
+from src.create_conditionals import CondCreat
 from src.dataloader import Downloader
 
 
@@ -115,6 +115,7 @@ class IPF:
     @staticmethod
     def probabilistic_sampling(p, total_pop):
         probas = np.float64(p[0]).ravel()
+        probas /= np.sum(probas)
         selected = list(np.random.choice(len(probas), total_pop, True, probas))
         count_list = []
         for i in range(6480):
@@ -176,15 +177,15 @@ class IPF:
 
 
 def main():
-    f = open(os.path.join(PROJECT_PATH, "data/ipf_marginal.json"))
+    f = open(os.path.join(PROJECT_PATH, "data/marginal_ipf.json"))
     json_dict = json.load(f)
 
     data = Downloader.read_data(file=os.path.join(PROJECT_PATH, "data/Census_2016_Individual_PUMF.dta"))
 
-    # names = ["agegrp", "Sex", "hdgree", "lfact", "TotInc", "hhsize"]
-    # ipf = IPF(table=data, json_dict=json_dict, province=10, size=0.2)
-    # ipf_data = ipf.create_synth_pop()
-
+    names = ["agegrp", "Sex", "hdgree", "lfact", "TotInc", "hhsize"]
+    ipf = IPF(table=data, json_dict=json_dict, province=10, size=0.2)
+    ipf_data = ipf.create_synth_pop()
+    print(ipf_data)
 
 if __name__ == "__main__":
     main()

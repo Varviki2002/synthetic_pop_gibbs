@@ -7,7 +7,7 @@ from pgmpy.factors.discrete import (TabularCPD)
 from pgmpy.models import BayesianNetwork
 
 from src import PROJECT_PATH
-from src.create_synth_pop import CondCreat
+from src.create_conditionals import CondCreat
 from src.dataloader import Downloader
 from src.gibbs_sampling import NewGibbsSampling
 from src.validation import Validation
@@ -166,23 +166,22 @@ class SyntheticPopulationGenerator:
         hhsize_2 = {"hhsize": ["1", "2", "3", "4", "5+"]}
 
         validation = Validation(
-            creat_class=CondCreat(
-                table=self.table, full_evidence=self.full_evidence,
-                partial_evidence=self.partial_evidence, full_names=self.full_names,
-                save=False, partial_1=self.partial_1),
-            names=self.full_names)
+            creat_class=CondCreat(table=self.table, full_evidence=self.full_evidence,
+                                  partial_evidence=self.partial_evidence, full_names=self.full_names,
+                                  save=False, partial_1=self.partial_1, size=self.size), names=self.full_names,
+            table=self.table)
         validation.plot_figures(
             col_name="Sex", dict_1=gender_1,
-            dict_2=gender_2)
+            dict_2=gender_2, title="Gender")
         validation.plot_figures(
             col_name="agegrp", dict_1=age_group_1,
-            dict_2=age_group_2)
+            dict_2=age_group_2, title="Age")
         validation.plot_figures(
             col_name="hdgree", dict_1=hdgree_1,
-            dict_2=hdgree_2)
+            dict_2=hdgree_2, title="Highest degree")
         validation.plot_figures(
             col_name="hhsize", dict_1=hhsize_1,
-            dict_2=hhsize_2)
+            dict_2=hhsize_2, title="Householdsize")
 
         validation.plot_lin_regression(
             x=validation.cross_gibbs,
@@ -206,7 +205,7 @@ def main():
     names = ["agegrp", "Sex", "hdgree", "lfact", "TotInc", "hhsize"]
     partial_1 = ["agegrp", "hdgree", "lfact", "TotInc", "hhsize"]
 
-    generate_synth = SyntheticPopulationGenerator(full_names=names, partial_1=partial_1)
+    generate_synth = SyntheticPopulationGenerator(full_names=names, partial_1=partial_1, size=0.05)
 
     generate_synth.run_cond_creat()
     generate_synth.run_validation()

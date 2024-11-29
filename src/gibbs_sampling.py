@@ -185,7 +185,7 @@ def main():
     # samples.drop(samples.index[0:50000], axis=0, inplace=True)
     # samples = samples.iloc[::10, :]
     # print(samples.shape)
-    # samples.to_csv(os.path.join(data_generated, "samples.csv"), index=False)
+    # samples.to_csv(os.path.join(data_generated, "samples_20percent.csv"), index=False)
 
     population_partial = BayesianNetwork(
         [("agegrp", "Sex"),
@@ -200,12 +200,13 @@ def main():
         evidence=evidence_partial_1,
         model=population_partial,
         partial=partial_1)
-    samples_partial = gibbs_chain_partial.sample(size=9165670)
+    samples_partial = gibbs_chain_partial.sample(size=9215670)
     print(type(samples_partial))
+    samples_partial.drop(samples_partial.index[0:50000], axis=0, inplace=True)
     samples_partial = samples_partial.iloc[::10, :]
     print(samples_partial.shape)
     samples_partial.to_csv(
-        os.path.join(data_generated, "samples_partial.csv"),
+        os.path.join(data_generated, "samples_partial_20.csv"),
         index=False)
 
 
